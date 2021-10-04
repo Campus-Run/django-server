@@ -7,7 +7,7 @@ from django.conf.urls import include
 urlpatterns = [
   path("", views.login_view, name="login"),
   path("main/", views.main_view, name="main"),
-  path("verifyUniv/", views.verify_univ_view),
+  path("verifyUniv/", views.verify_univ_view, name="univ_verify"),
   path("verifyUnivAction/", views.verify_univ),
   path("login/kakao/", views.KakaoSignInView),
   path("login/kakao/callback", views.KakaoSignInCallback),

@@ -12,6 +12,7 @@ from django.core.exceptions import ImproperlyConfigured
 from .models import user
 import hashlib
 from django.views.generic import View
+from .univ_list import UNIV_DOMAIN, UNIV_LIST
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -50,15 +51,22 @@ def verify_univ_view(request):
 def verify_univ(request):
   try:
     address = request.GET['email']
-    user = get_user_by_token(request)
+    mail_domain = address.split('@')[1]
+    usr = get_user_by_token(request)
+    usr.univ_verified = False
+    if UNIV_DOMAIN not in mail_domain:
+      return HttpResponse('fail')
+    if mail_domain in UNIV_LIST:
+      usr.univ_name = UNIV_LIST[mail_domain]
     print('USER',user)
     mailTitle = "캠퍼스런 이메일 인증을 완료해주세요."
     domain = get_current_site(request).domain
-    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-    token = account_activation_token.make_token(user)
+    uidb64 = urlsafe_base64_encode(force_bytes(usr.pk))
+    token = account_activation_token.make_token(usr)
     mailData = message(domain, uidb64, token)
     email = EmailMessage(mailTitle, mailData, to=[address])
     email.send()
+    usr.save()
     return HttpResponse('success')
   except:
     return HttpResponse('fail')
