@@ -10,4 +10,5 @@ urlpatterns = [
   path("verifyUniv/", views.verify_univ),
   path("login/kakao/", views.KakaoSignInView),
   path("login/kakao/callback", views.KakaoSignInCallback),
+  path("idTokenCheck/", views.id_token_check),
 ]

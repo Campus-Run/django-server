@@ -106,3 +106,11 @@ def isNewface(request, id):
   if len(user_qs) == 0:
     return True
   return False
+
+
+def id_token_check(request):
+  token = request.GET['token']
+  user_qs = user.objects.filter(hashed_id=token)
+  if len(user_qs) == 1:
+    return HttpResponse('exist')
+  return HttpResponse('not-exist')
