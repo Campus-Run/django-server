@@ -11,6 +11,7 @@ import json, os, requests
 from django.core.exceptions import ImproperlyConfigured
 from .models import user
 import hashlib
+from django.views.generic import View
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -65,22 +66,18 @@ def verify_univ(request):
 
 class Activate(View):
     def get(self, request, uidb64, token):
-        try:
-            uid = force_text(urlsafe_base64_decode(uidb64))
-            user = UserInfo.objects.get(pk=uid)
+      # try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        usr = user.objects.get(pk=uid)
+        print("Activate:", usr)
+        if account_activation_token.check_token(usr, token):
+          usr.univ_verified = True
+          usr.save()
+          return redirect('main')
+        return redirect('login')
+      # except:
+      #   return redirect('login')
 
-            if account_activation_token.check_token(user, token):
-                user.is_active = True
-                user.save()
-                return redirect('login')
-
-            return JsonResponse({"message" : "AUTH FAIL"}, status=400)
-
-        except ValidationError:
-            return JsonResponse({"message" : "TYPE_ERROR"}, status=400)
-        except KeyError:
-            return JsonResponse({"message" : "INVALID_KEY"}, status=400)       
-  
 
 def get_user_by_token(request):
   token = request.GET['token']

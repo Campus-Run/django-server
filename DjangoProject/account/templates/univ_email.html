@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block header %}
+  <title>Univ-Email</title>
+{% endblock %}
+{% block contents %}
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+    <input class="email-address" style="display: inline-block;" type="text">
+    <div onclick="univEmailVerify()" class="univ-email-verify">Send</div>
+  </div>
+
+  <script>
+    const univEmailVerify = () => {
+      if(!'idToken' in localStorage) {
+        location.href='/';
+      }
+      let address = document.querySelector('.email-address').value;
+      $.ajax({
+        url: '/verifyUnivAction/',
+        type: 'GET',
+        async: false,
+        data: {
+          'token': localStorage.getItem('idToken'),
+          'email': address
+        },
+        success: function(data) {
+            console.log(data)
+            if(data === 'success') {
+              alert(`${address}로 전송된 이메일을 통해 대학 인증을 완료하세요!`);
+            } else {
+              alert(`인증메일 전송에 실패하였습니다\n잠시후 다시 시도하세요.`);
+            }
+        }
+      });
+    }
+  </script>
+{% endblock %}
