@@ -1,0 +1,5 @@
+myvenv
+secrets.json
+.DS_Store
+**/.DS_Store
+__pycache__
