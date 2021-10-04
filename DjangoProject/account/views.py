@@ -54,7 +54,7 @@ def verify_univ(request):
     mail_domain = address.split('@')[1]
     usr = get_user_by_token(request)
     usr.univ_verified = False
-    if UNIV_DOMAIN not in mail_domain:
+    if UNIV_DOMAIN[0] not in mail_domain and UNIV_DOMAIN[1] not in mail_domain:
       return HttpResponse('fail')
     if mail_domain in UNIV_LIST:
       usr.univ_name = UNIV_LIST[mail_domain]
