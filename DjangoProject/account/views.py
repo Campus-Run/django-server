@@ -42,16 +42,54 @@ def main_view(request):
   return render(request, 'main.html')
 
 
-def verify_univ(request, user):
-  address = request.GET['email']
-  mailTitle = "캠퍼스런 이메일 인증을 완료해주세요."
-  domain = get_current_site(request).domain
-  uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-  token = account_activation_token.make_token(user)
-  mailData = message(domain, uidb64, token)
-  email = EmailMessage(mailTitle, mailData, to=[address])
-  email.send()
+def verify_univ_view(request):
+  return render(request, 'univ_email.html')
+
+
+def verify_univ(request):
+  try:
+    address = request.GET['email']
+    user = get_user_by_token(request)
+    print('USER',user)
+    mailTitle = "캠퍼스런 이메일 인증을 완료해주세요."
+    domain = get_current_site(request).domain
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = account_activation_token.make_token(user)
+    mailData = message(domain, uidb64, token)
+    email = EmailMessage(mailTitle, mailData, to=[address])
+    email.send()
+    return HttpResponse('success')
+  except:
+    return HttpResponse('fail')
+
+
+class Activate(View):
+    def get(self, request, uidb64, token):
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            user = UserInfo.objects.get(pk=uid)
+
+            if account_activation_token.check_token(user, token):
+                user.is_active = True
+                user.save()
+                return redirect('login')
+
+            return JsonResponse({"message" : "AUTH FAIL"}, status=400)
+
+        except ValidationError:
+            return JsonResponse({"message" : "TYPE_ERROR"}, status=400)
+        except KeyError:
+            return JsonResponse({"message" : "INVALID_KEY"}, status=400)       
   
+
+def get_user_by_token(request):
+  token = request.GET['token']
+  print()
+  user_qs = user.objects.filter(hashed_id=token)
+  if len(user_qs) == 1:
+    return user_qs[0]
+  return False
+
 
 def KakaoSignInView(request):
   return redirect(API_HOST)
@@ -114,3 +152,4 @@ def id_token_check(request):
   if len(user_qs) == 1:
     return HttpResponse('exist')
   return HttpResponse('not-exist')
+
