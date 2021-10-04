@@ -7,6 +7,14 @@ from .email_text import message
 from .tokens import account_activation_token
 
 
+def login_view(request):
+  return render(request, 'login.html')
+
+
+def main_view(request):
+  return render(request, 'main.html')
+
+
 def verify_univ(request, user):
   address = request.GET['email']
   mailTitle = "캠퍼스런 이메일 인증을 완료해주세요."
