@@ -1,10 +1,37 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from .email_text import message
 from .tokens import account_activation_token
+from pathlib import Path
+from django.http.response import HttpResponse, JsonResponse
+import json, os, requests
+from django.core.exceptions import ImproperlyConfigured
+from .models import user
+import hashlib
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+SECRET_FILE = os.path.join(BASE_DIR, 'secrets.json')
+
+
+with open(SECRET_FILE) as f:
+    secrets = json.loads(f.read())
+
+
+def get_secret(setting, secrets=secrets):
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = "Set the {} env variable.".format(setting)
+        raise ImproperlyConfigured(error_msg)
+
+
+REST_API_KEY = get_secret('KAKAO_REST_KEY')
+REDIRECT_URI = "http://localhost:8000/login/kakao/callback"
+API_HOST = 'https://kauth.kakao.com/oauth/authorize?client_id='+REST_API_KEY+'&redirect_uri='+REDIRECT_URI+'&response_type=code'
 
 
 def login_view(request):
@@ -24,3 +51,58 @@ def verify_univ(request, user):
   mailData = message(domain, uidb64, token)
   email = EmailMessage(mailTitle, mailData, to=[address])
   email.send()
+  
+
+def KakaoSignInView(request):
+  return redirect(API_HOST)
+  
+  
+def KakaoSignInCallback(request):
+  CODE = request.GET['code']
+  kakao_token_api = 'https://kauth.kakao.com/oauth/token'
+  data = {
+    'grant_type': 'authorization_code',
+    'client_id': REST_API_KEY,
+    'redirection_uri': 'http://localhost:8000/account/login/kakao/callback',
+    'code': CODE,
+  }
+  
+  token_response = requests.post(kakao_token_api, data=data)
+  access_token = token_response.json().get('access_token')
+  user_info_response = requests.get('https://kapi.kakao.com/v2/user/me', headers={"Authorization": f'Bearer {access_token}'})
+  user_info_json = user_info_response.json()
+  
+  user_data = {
+    'id': '',
+    'email': '',
+    'nickname': ''
+  }
+  
+  if 'id' in user_info_json:
+    kakao_id = user_info_json['id']
+    request.session['kakao_id'] = kakao_id
+    user_data['id'] = kakao_id
+    
+  if 'kakao_account' in user_info_json:
+    if 'email' in user_info_json['kakao_account']:
+      user_data['email'] = user_info_json['kakao_account']['email']
+    if 'nickname' in user_info_json['kakao_account']['profile']:
+      user_data['nickname'] = user_info_json['kakao_account']['profile']['nickname']
+
+  kakao_id = user_data['id']
+  hashed_id = hashlib.sha256(str(kakao_id).encode()).hexdigest()
+
+  if isNewface(request, kakao_id):
+    if 'email' in user_data:
+      user.objects.create(kakao_id=kakao_id, kakao_email=user_data['email'], kakao_name=user_data['nickname'], hashed_id=hashed_id) 
+    else:
+      user.objects.create(kakao_id=kakao_id, kakao_name=user_data['nickname'], hashed_id=hashed_id) 
+  
+  return render(request, 'save-token.html', {'hashed_id': hashed_id})
+
+
+def isNewface(request, id):
+  user_qs = user.objects.filter(kakao_id=id)
+  if len(user_qs) == 0:
+    return True
+  return False
