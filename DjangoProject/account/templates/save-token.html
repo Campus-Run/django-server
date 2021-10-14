@@ -7,10 +7,11 @@
   <title>SaveToken</title>
 </head>
 <body>
+  res = {{res}}
 </body>
 </html>
 
 <script>
   localStorage.setItem('idToken', `{{ hashed_id }}`)
-  window.location = '/main';
+  // window.location = 'https://localhost:8001/main';
 </script>

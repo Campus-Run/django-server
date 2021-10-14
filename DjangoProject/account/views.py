@@ -6,7 +6,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from .email_text import message
 from .tokens import account_activation_token
 from pathlib import Path
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import HttpResponse, HttpResponseBadRequest, JsonResponse
 import json, os, requests
 from django.core.exceptions import ImproperlyConfigured
 from .models import user
@@ -141,8 +141,15 @@ def KakaoSignInCallback(request):
     else:
       user.objects.create(kakao_id=kakao_id, kakao_name=user_data['nickname'], hashed_id=hashed_id) 
   
-  return render(request, 'save-token.html', {'hashed_id': hashed_id})
-
+  # @FIXME: 배포 후 도메인 수정할 것
+  nodeURL = 'http://localhost:3000/kakaoLogin'
+  params = {'idToken': hashed_id}
+  res = requests.get(nodeURL, params=params)
+  print("RES",res)
+  if res.status_code == 200:
+    return redirect('http://localhost:3000/')
+  return redirect(nodeURL)
+  
 
 def isNewface(request, id):
   user_qs = user.objects.filter(kakao_id=id)
@@ -157,4 +164,3 @@ def id_token_check(request):
   if len(user_qs) == 1:
     return HttpResponse('exist')
   return HttpResponse('not-exist')
-
