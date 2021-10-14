@@ -1,17 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SaveToken</title>
-</head>
-<body>
-  res = {{res}}
-</body>
-</html>
-
+{% extends 'base.html' %} {% load static %} {% block header %}
+<title>main</title>
+<div id="tokenValue">{{ idToken }}</div>
+{% endblock %} {% block contents %}
 <script>
-  localStorage.setItem('idToken', `{{ hashed_id }}`)
-  // window.location = 'https://localhost:8001/main';
+  // window.onload = () => {
+  let token = document.querySelector("#tokenValue").innerHTML;
+  // $.ajax({
+  //  url: "http://localhost:3000/kakaoLogin/",
+  //  type: "GET",
+  //  async: false,
+  // data: { idToken: token },
+  //  success: function(data) {}
+  //  });
+  const TARGET_URL = "http://localhost:3000/kakaoLogin?idToken=" + token;
+  location.href = TARGET_URL;
+  // };
 </script>
+{% endblock %}
