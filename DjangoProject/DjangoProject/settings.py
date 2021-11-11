@@ -1,5 +1,6 @@
 from pathlib import Path
-import json, os
+import json
+import os
 from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -10,12 +11,14 @@ SECRET_FILE = os.path.join(BASE_DIR, 'secrets.json')
 with open(SECRET_FILE) as f:
     secrets = json.loads(f.read())
 
+
 def get_secret(setting, secrets=secrets):
     try:
         return secrets[setting]
     except KeyError:
         error_msg = "Set the {} env variable.".format(setting)
         raise ImproperlyConfigured(error_msg)
+
 
 SECRET_KEY = get_secret("SECRET_KEY")
 
@@ -39,7 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'account',
+    'feed',
     'corsheaders',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -139,3 +144,4 @@ EMAIL_HOST_PASSWORD = get_secret("HOST_EMAIL_PASSWD")
 EMAIL_USE_TLS = True
 # TLS 보안 방법
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+CSRF_COOKIE_SECURE = True
