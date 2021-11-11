@@ -100,6 +100,7 @@ def get_user_by_token(request):
 
 
 def KakaoSignInView(request):
+    # return HttpResponse('왜안됨요?')
     return redirect(API_HOST)
 
 
