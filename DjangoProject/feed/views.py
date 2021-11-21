@@ -5,18 +5,40 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http.response import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.forms.models import model_to_dict
 # Create your views here.
 
 
+@csrf_exempt
+@api_view(['POST', 'GET'])
 def ranking(request):
-    user_data = user.objects.get(hashed_id=request.headers['token'])
-    if request.method == 'GET':
+    if request.method == 'POST':
+        user_data = user.objects.get(kakao_email=request.data['name'])
 
-        return JsonResponse({'userName': user_data.kakao_name, 'univName': user_data.univ_name, 'kakaoEmail': user_data.kakao_email}, status=200)
+        ranking = Ranking.objects.create(
+            player=user_data,
+            lap_time=request.data['time'],
+
+        )
+        return Response({'player': user_data.kakao_name, 'time': ranking.lap_time, 'score': ranking.score}, status=200)
+
+    if request.method == 'GET':
+        rankings = Ranking.objects.filter(score=0).order_by('lap_time')
+
+        ranking_data = []
+        for ranking in rankings:
+            ranking_data.append({
+                'player': ranking.player.kakao_name,
+                'time': ranking.lap_time,
+                'score': ranking.score
+            })
+
+        print(rankings)
+        return Response({'ranking_data': ranking_data}, status=200)
 
 
 @csrf_exempt
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 def room(request):
     user_data = user.objects.get(hashed_id=request.headers['token'])
     if request.method == 'POST':
