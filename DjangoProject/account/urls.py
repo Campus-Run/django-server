@@ -14,5 +14,5 @@ urlpatterns = [
     path("idTokenCheck/", views.id_token_check),
     path('activate/<str:uidb64>/<str:token>',
          views.Activate.as_view(), name="activate"),
-    path("user/", views.post_user, name="user")
+    path("user/", views.post_user, name="user"),
 ]
