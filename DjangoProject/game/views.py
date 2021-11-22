@@ -39,6 +39,7 @@ def check_room_full(request):
         body = json.loads(body_unicode)
         if('roomURL' not in body or 'count' not in body):
             return JsonResponse(status=500, data={'status': 500, 'message': "필요한 데이터가 없습니다."})
+        print(body['roomURL'])
         room_obj = Room.objects.filter(url=body['roomURL'])
         if len(room_obj) == 0:
             return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
