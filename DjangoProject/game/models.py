@@ -11,7 +11,8 @@ class Ranking(models.Model):
 
 
 class Room(models.Model):
-    room_id = models.AutoField(primary_key=True, default=0)
+    room_id = models.AutoField(primary_key=True)
+    url = models.TextField(default="_")
     title = models.TextField(null=True)
     creater = models.ForeignKey(
         user, on_delete=models.CASCADE, null=True)
@@ -19,5 +20,6 @@ class Room(models.Model):
         univ, on_delete=models.CASCADE, related_name="home_room")
     opponent_univ = models.ForeignKey(
         univ, on_delete=models.CASCADE, related_name="away_room")
+    max_join = models.IntegerField(null=False, default=0)
     created_at = models.DateTimeField(null=False, default=timezone.now)
     is_deleted = models.BooleanField(default=False)

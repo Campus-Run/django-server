@@ -187,9 +187,8 @@ def post_user(request):
 def api_init_univ_table(request):
     if request.method == 'GET':
         try:
-            print("IT's GET")
             univ.objects.all().delete()
-            print('clear')
+            print('account.univ table clear')
             for domain, name in UNIV_LIST.items():
                 univ.objects.create(name=name, domain=domain)
             return JsonResponse(status=200, data={'status': 200, 'message': "Univ table 초기화 완료"})
