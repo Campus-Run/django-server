@@ -13,4 +13,5 @@ urlpatterns = [
          views.Activate.as_view(), name="activate"),
     path("user/", views.post_user, name="user"),
     path("api/init-univ", views.api_init_univ_table),
+    path("api/insert-dummy-user", views.create_dummy_user_data),
 ]

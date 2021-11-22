@@ -195,3 +195,15 @@ def api_init_univ_table(request):
         except:
             return JsonResponse(status=500, data={'status': 500, 'message': "Database 처리 에러"})
     return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
+
+
+def create_dummy_user_data(request):
+    user.objects.create(kakao_email="myeong@naver.com", kakao_name="김명준",
+                        kakao_id=123123123, hashed_id=123123123, univ_name="중앙대", univ_verified=True)
+    user.objects.create(kakao_email="yuniiyuns@naver.com", kakao_name="윤선영",
+                        kakao_id=1231231234, hashed_id=1231231234, univ_name="중앙대", univ_verified=True)
+    user.objects.create(kakao_email="seogroundwater@naver.com", kakao_name="서지수",
+                        kakao_id=1231231235, hashed_id=1231231235, univ_name="숭실대", univ_verified=True)
+    user.objects.create(kakao_email="unanchoi@naver.com", kakao_name="최윤한",
+                        kakao_id=1231231236, hashed_id=1231231236, univ_name="숭실대", univ_verified=True)
+    return JsonResponse(status=500, data={'status': 200, 'message': "User dummy data 생성 완료"})
