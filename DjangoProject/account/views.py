@@ -192,7 +192,7 @@ def api_init_univ_table(request):
             print('clear')
             for domain, name in UNIV_LIST.items():
                 univ.objects.create(name=name, domain=domain)
-            return JsonResponse(status=200, data={'status': '200', 'message': "Univ table 초기화 완료"})
+            return JsonResponse(status=200, data={'status': 200, 'message': "Univ table 초기화 완료"})
         except:
-            return JsonResponse(status=500, data={'status': '500', 'message': "Database 처리 에러"})
-    return JsonResponse(status=500, data={'status': '500', 'message': "Request Method가 잘못되었습니다."})
+            return JsonResponse(status=500, data={'status': 500, 'message': "Database 처리 에러"})
+    return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
