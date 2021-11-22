@@ -11,7 +11,7 @@ import json
 import os
 import requests
 from django.core.exceptions import ImproperlyConfigured
-from .models import user
+from .models import user, univ
 import hashlib
 from django.views.generic import View
 from .univ_list import UNIV_DOMAIN, UNIV_LIST
@@ -182,3 +182,17 @@ def post_user(request):
     user_data = user.objects.get(hashed_id=request.headers['token'])
 
     return JsonResponse({'userName': user_data.kakao_name, 'univName': user_data.univ_name, 'kakaoEmail': user_data.kakao_email}, status=200)
+
+
+def api_init_univ_table(request):
+    if request.method == 'GET':
+        try:
+            print("IT's GET")
+            univ.objects.all().delete()
+            print('clear')
+            for domain, name in UNIV_LIST.items():
+                univ.objects.create(name=name, domain=domain)
+            return JsonResponse(status=200, data={'status': '200', 'message': "Univ table 초기화 완료"})
+        except:
+            return JsonResponse(status=500, data={'status': '500', 'message': "Database 처리 에러"})
+    return JsonResponse(status=500, data={'status': '500', 'message': "Request Method가 잘못되었습니다."})

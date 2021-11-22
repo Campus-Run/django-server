@@ -21,4 +21,5 @@ class user(models.Model):
 
 class univ(models.Model):
     name = models.CharField(max_length=18, null=False, primary_key=True)
+    domain = models.CharField(max_length=50, null=False, default=" ")
     is_deleted = models.BooleanField(null=False, default=False)
