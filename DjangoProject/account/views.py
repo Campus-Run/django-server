@@ -181,7 +181,7 @@ def post_user(request):
     print(request.headers['token'])
     user_data = user.objects.get(hashed_id=request.headers['token'])
 
-    return JsonResponse({'userName': user_data.kakao_name, 'univName': user_data.univ_name, 'kakaoEmail': user_data.kakao_email}, status=200)
+    return JsonResponse({'userName': user_data.kakao_name, 'univName': user_data.univ_name, 'kakaoEmail': user_data.kakao_email, 'kakaoId': user_data.kakao_id}, status=200)
 
 
 def api_init_univ_table(request):
