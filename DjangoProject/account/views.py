@@ -214,12 +214,11 @@ def user_search(request):
         keyword = request.GET['keyword']
         qs = user.objects.filter(kakao_name__contains=keyword)
         res = {'data': []}
-        print(qs, " / ", keyword)
         for i in range(len(qs)):
+            kakao_id = qs[i].kakao_id
             name = qs[i].kakao_name
             univ_name = qs[i].univ_name
             email = qs[i].kakao_email
-            kakao_id = qs[i].kakao_id
             obj = {
                 'kakao_id': kakao_id,
                 'name': name,
@@ -227,5 +226,25 @@ def user_search(request):
                 'email': email
             }
             res['data'].append(obj)
+        return JsonResponse(status=200, data={'status': 200, 'message': res})
+    return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
+
+
+def user_by_kakaoid(request):
+    if request.method == 'GET':
+        kakao_id = request.GET['kakaoId']
+        qs = user.objects.filter(kakao_id=kakao_id)[0]
+        res = {'data': []}
+        kakao_id = qs.kakao_id
+        name = qs.kakao_name
+        univ_name = qs.univ_name
+        email = qs.kakao_email
+        obj = {
+            'kakao_id': kakao_id,
+            'name': name,
+            'univ_name': univ_name,
+            'email': email
+        }
+        res['data'].append(obj)
         return JsonResponse(status=200, data={'status': 200, 'message': res})
     return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
