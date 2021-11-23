@@ -207,3 +207,25 @@ def create_dummy_user_data(request):
     user.objects.create(kakao_email="unanchoi@naver.com", kakao_name="최윤한",
                         kakao_id=1231231236, hashed_id=1231231236, univ_name="숭실대", univ_verified=True)
     return JsonResponse(status=500, data={'status': 200, 'message': "User dummy data 생성 완료"})
+
+
+def user_search(request):
+    if request.method == 'GET':
+        keyword = request.GET['keyword']
+        qs = user.objects.filter(kakao_name__contains=keyword)
+        res = {'data': []}
+        print(qs, " / ", keyword)
+        for i in range(len(qs)):
+            name = qs[i].kakao_name
+            univ_name = qs[i].univ_name
+            email = qs[i].kakao_email
+            kakao_id = qs[i].kakao_id
+            obj = {
+                'kakao_id': kakao_id,
+                'name': name,
+                'univ_name': univ_name,
+                'email': email
+            }
+            res['data'].append(obj)
+        return JsonResponse(status=200, data={'status': 200, 'message': res})
+    return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
