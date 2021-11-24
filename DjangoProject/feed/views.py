@@ -8,6 +8,7 @@ from django.http.response import HttpResponse, HttpResponseBadRequest, JsonRespo
 from django.forms.models import model_to_dict
 
 from account.univ_list import UNIV_LIST
+from operator import itemgetter
 # Create your views here.
 
 
@@ -42,7 +43,7 @@ def create_ranking(request):
 
 @csrf_exempt
 @api_view(['GET'])
-def speedy(request, map_id):
+def speedy_ranking(request, map_id):
     if request.method == 'GET':
         map_list = list(UNIV_LIST.values())
         rankings = Ranking.objects.filter(game_map=map_list[map_id]).order_by('lap_time')
@@ -63,35 +64,32 @@ def speedy(request, map_id):
         print(rankings)
         return JsonResponse(status=200, data={'status': 200, 'message': "Speedy Ranking List", 'ranking_data': ranking_data})
 
-'''
-
 @csrf_exempt
-@api_view(['POST', 'GET'])
-def ranking(request):
-    if request.method == 'POST':
-        user_data = user.objects.get(kakao_email=request.data['name'])
-
-        ranking = Ranking.objects.create(
-            player=user_data,
-            lap_time=request.data['time'],
-
-        )
-        return Response({'player': user_data.kakao_name, 'time': ranking.lap_time, 'score': ranking.score}, status=200)
-
+@api_view(['GET'])
+def univ_ranking(request):
     if request.method == 'GET':
-        rankings = Ranking.objects.filter(score=0).order_by('lap_time')
+        univ_score = dict(zip(UNIV_LIST.values(), range(len(UNIV_LIST))))
+        for key, value in univ_score.items():
+            univ_score[key] = 0
 
-        ranking_data = []
+        rankings = Ranking.objects.all()
         for ranking in rankings:
+            user_data=user.objects.get(kakao_email=ranking.player)
+            univ_score[user_data.univ_name] += ranking.score
+            print(univ_score[ranking.game_map])
+
+        ranking_data=[]
+
+        for key, value in univ_score.items():
             ranking_data.append({
-                'player': ranking.player.kakao_name,
-                'time': ranking.lap_time,
-                'score': ranking.score
+                'univ': key,
+                'score': value,
             })
 
-        print(rankings)
-        return Response({'ranking_data': ranking_data}, status=200)
-'''
+        ranking_data.sort(key=itemgetter('score'), reverse=True)
+        return JsonResponse(status=200, data={'status': 200, 'message': "University Ranking List", 'ranking_data': ranking_data})
+
+
 
 @csrf_exempt
 @api_view(['POST', 'GET'])

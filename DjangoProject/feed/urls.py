@@ -6,6 +6,7 @@ from django.conf.urls import include
 
 urlpatterns = [
     path("api/create-ranking", views.create_ranking, name="create_ranking"),
-    path("api/speedy-ranking/<int:map_id>", views.speedy, name="speedy"),
+    path("api/speedy-ranking/<int:map_id>", views.speedy_ranking, name="speedy_ranking"),
+    path("api/univ-ranking", views.univ_ranking, name="univ_ranking"),
     path('room', views.room, name="room")
 ]
