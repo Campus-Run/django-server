@@ -5,5 +5,6 @@ from django.urls import path
 urlpatterns = [
     path("api/create-room", views.create_room),
     path("api/check-room-full", views.check_room_full),
-    path("api/create-room", views.create_room)
+    path("api/create-room", views.create_room),
+    path("api/send-invite", views.send_invite)
 ]
