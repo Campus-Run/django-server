@@ -41,3 +41,4 @@ class Invitation(models.Model):
     max_join = models.IntegerField(null=False, default=0)
     created_at = models.DateTimeField(null=False, default=timezone.now)
     is_deleted = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
