@@ -16,7 +16,36 @@ UNIV_LIST = {
   'uos.ac.kr': '시립대',
 }
 
-univ_list = dict(zip(UNIV_LIST.values(), range(len(UNIV_LIST))))
-for key, value in univ_list.items():
-    univ_list[key] = 0
-print(univ_list)
+
+terrestrial_planet = {
+    'Mercury' : {
+        'mean_radius' : 2439.7,
+        'mass' : 3.3022E+23,
+        'orbital_period' : 87.969
+        },
+    'Venus' : {
+        'mean_radius' : 6051.8,
+        'mass' : 4.8676E+24,
+        'orbital_period' : 224.70069
+        },
+    'Earth' : {
+        'mean_radius' : 6371.0,
+        'mass' : 5.97219E+24,
+        'orbital_period' : 365.25641
+        },
+    'Mars' : {
+        'mean_radius' : 3389.5,
+        'mass' : 6.4185E+23,
+        'orbital_period' : 686.9600
+        }
+    }
+
+print(terrestrial_planet['Mars']['mean_radius'])
+newname = 121
+newmean_radius = 424
+newmass = 54
+newi = 121
+
+
+terrestrial_planet[newname] = {'hit':newmass, 'love':newmean_radius}
+print(terrestrial_planet.keys())

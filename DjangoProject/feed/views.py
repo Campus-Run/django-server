@@ -35,7 +35,7 @@ def create_ranking(request):
                 if record.lap_time >= request.data['time']:
                     print("출력!!", record.lap_time)
                     record.lap_time=request.data['time']
-                    record.score=request.data['score']
+                    record.score+=request.data['score']
                     record.save()
                     return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Ranking을 수정하였습니다.", 'player': user_data.kakao_name})
         except:
@@ -73,6 +73,7 @@ def univ_ranking(request):
             univ_score[key] = 0
 
         rankings = Ranking.objects.all()
+
         for ranking in rankings:
             user_data=user.objects.get(kakao_email=ranking.player)
             univ_score[user_data.univ_name] += ranking.score
@@ -88,6 +89,32 @@ def univ_ranking(request):
 
         ranking_data.sort(key=itemgetter('score'), reverse=True)
         return JsonResponse(status=200, data={'status': 200, 'message': "University Ranking List", 'ranking_data': ranking_data})
+
+@csrf_exempt
+@api_view(['GET'])
+def personal_ranking(request):
+    if request.method == 'GET':
+        rankings = Ranking.objects.all()
+
+        ranking_data = {}
+
+        for ranking in rankings:
+            user_data=user.objects.get(kakao_email=ranking.player)
+            if user_data.kakao_email not in ranking_data.keys():
+                ranking_data[user_data.kakao_email] = {
+                    'player':ranking.player.kakao_name, 
+                    'univ':user_data.univ_name,
+                    'score':ranking.score
+                }
+            else:
+                print(ranking_data)
+                for rank in ranking_data:
+                    if str(rank) == str(ranking.player):
+                        ranking_data[rank]['score'] += ranking.score
+                        break
+        ranking_data = sorted(ranking_data, key=lambda x: ranking_data[x]['score'], reverse=True)
+        print("나와라ㅏ", ranking_data)
+        return JsonResponse(status=200, data={'status': 200, 'message': "Personal Ranking List", 'ranking_data': ranking_data})
 
 
 
