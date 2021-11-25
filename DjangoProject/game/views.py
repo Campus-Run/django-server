@@ -96,6 +96,7 @@ def invitation_by_id(request):
             result = []
             for qs in inv_qs:
                 result.append({
+                    'invId': qs.inv_id,
                     'title': qs.title,
                     'creater': qs.creater.kakao_name,
                     'url': qs.url,
