@@ -198,6 +198,7 @@ def api_init_univ_table(request):
 
 
 def create_dummy_user_data(request):
+    user.objects.all().delete()
     user.objects.create(kakao_email="myeong@naver.com", kakao_name="김명준",
                         kakao_id=123123123, hashed_id=123123123, univ_name="중앙대", univ_verified=True)
     user.objects.create(kakao_email="yuniiyuns@naver.com", kakao_name="윤선영",
@@ -206,6 +207,18 @@ def create_dummy_user_data(request):
                         kakao_id=1231231235, hashed_id=1231231235, univ_name="숭실대", univ_verified=True)
     user.objects.create(kakao_email="unanchoi@naver.com", kakao_name="최윤한",
                         kakao_id=1231231236, hashed_id=1231231236, univ_name="숭실대", univ_verified=True)
+    user.objects.create(kakao_email="yonseikim@naver.com", kakao_name="김연세",
+                        kakao_id=1231231237, hashed_id=1231231237, univ_name="연세대", univ_verified=True)
+    user.objects.create(kakao_email="seungahkim@naver.com", kakao_name="김승아",
+                        kakao_id=1231231238, hashed_id=1231231238, univ_name="연세대", univ_verified=True)
+    user.objects.create(kakao_email="zzanggyu@naver.com", kakao_name="이찬규",
+                        kakao_id=1231231239, hashed_id=1231231239, univ_name="연세대", univ_verified=True)
+    user.objects.create(kakao_email="oereo@naver.com", kakao_name="인세훈",
+                        kakao_id=1231231240, hashed_id=1231231240, univ_name="중앙대", univ_verified=True)
+    user.objects.create(kakao_email="jwjjy@naver.com", kakao_name="정지원",
+                        kakao_id=1231231241, hashed_id=1231231241, univ_name="건국대", univ_verified=True)
+    user.objects.create(kakao_email="mocaya@naver.com", kakao_name="김태영",
+                        kakao_id=1231231242, hashed_id=1231231242, univ_name="건국대", univ_verified=True)
     return JsonResponse(status=500, data={'status': 200, 'message': "User dummy data 생성 완료"})
 
 
