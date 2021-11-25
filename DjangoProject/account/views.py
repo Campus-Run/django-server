@@ -11,7 +11,7 @@ import json
 import os
 import requests
 from django.core.exceptions import ImproperlyConfigured
-from .models import user
+from .models import user, univ
 import hashlib
 from django.views.generic import View
 from .univ_list import UNIV_DOMAIN, UNIV_LIST
@@ -181,4 +181,83 @@ def post_user(request):
     print(request.headers['token'])
     user_data = user.objects.get(hashed_id=request.headers['token'])
 
-    return JsonResponse({'userName': user_data.kakao_name, 'univName': user_data.univ_name, 'kakaoEmail': user_data.kakao_email}, status=200)
+    return JsonResponse({'userName': user_data.kakao_name, 'univName': user_data.univ_name, 'kakaoEmail': user_data.kakao_email, 'kakaoId': user_data.kakao_id}, status=200)
+
+
+def api_init_univ_table(request):
+    if request.method == 'GET':
+        try:
+            univ.objects.all().delete()
+            print('account.univ table clear')
+            for domain, name in UNIV_LIST.items():
+                univ.objects.create(name=name, domain=domain)
+            return JsonResponse(status=200, data={'status': 200, 'message': "Univ table 초기화 완료"})
+        except:
+            return JsonResponse(status=500, data={'status': 500, 'message': "Database 처리 에러"})
+    return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
+
+
+def create_dummy_user_data(request):
+    user.objects.all().delete()
+    user.objects.create(kakao_email="myeong@naver.com", kakao_name="김명준",
+                        kakao_id=123123123, hashed_id=123123123, univ_name="중앙대", univ_verified=True)
+    user.objects.create(kakao_email="yuniiyuns@naver.com", kakao_name="윤선영",
+                        kakao_id=1231231234, hashed_id=1231231234, univ_name="중앙대", univ_verified=True)
+    user.objects.create(kakao_email="seogroundwater@naver.com", kakao_name="서지수",
+                        kakao_id=1231231235, hashed_id=1231231235, univ_name="숭실대", univ_verified=True)
+    user.objects.create(kakao_email="unanchoi@naver.com", kakao_name="최윤한",
+                        kakao_id=1231231236, hashed_id=1231231236, univ_name="숭실대", univ_verified=True)
+    user.objects.create(kakao_email="yonseikim@naver.com", kakao_name="김연세",
+                        kakao_id=1231231237, hashed_id=1231231237, univ_name="연세대", univ_verified=True)
+    user.objects.create(kakao_email="seungahkim@naver.com", kakao_name="김승아",
+                        kakao_id=1231231238, hashed_id=1231231238, univ_name="연세대", univ_verified=True)
+    user.objects.create(kakao_email="zzanggyu@naver.com", kakao_name="이찬규",
+                        kakao_id=1231231239, hashed_id=1231231239, univ_name="연세대", univ_verified=True)
+    user.objects.create(kakao_email="oereo@naver.com", kakao_name="인세훈",
+                        kakao_id=1231231240, hashed_id=1231231240, univ_name="중앙대", univ_verified=True)
+    user.objects.create(kakao_email="jwjjy@naver.com", kakao_name="정지원",
+                        kakao_id=1231231241, hashed_id=1231231241, univ_name="건국대", univ_verified=True)
+    user.objects.create(kakao_email="mocaya@naver.com", kakao_name="김태영",
+                        kakao_id=1231231242, hashed_id=1231231242, univ_name="건국대", univ_verified=True)
+    return JsonResponse(status=500, data={'status': 200, 'message': "User dummy data 생성 완료"})
+
+
+def user_search(request):
+    if request.method == 'GET':
+        keyword = request.GET['keyword']
+        qs = user.objects.filter(kakao_name__contains=keyword)
+        res = {'data': []}
+        for i in range(len(qs)):
+            kakao_id = qs[i].kakao_id
+            name = qs[i].kakao_name
+            univ_name = qs[i].univ_name
+            email = qs[i].kakao_email
+            obj = {
+                'kakao_id': kakao_id,
+                'name': name,
+                'univ_name': univ_name,
+                'email': email
+            }
+            res['data'].append(obj)
+        return JsonResponse(status=200, data={'status': 200, 'message': res})
+    return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
+
+
+def user_by_kakaoid(request):
+    if request.method == 'GET':
+        kakao_id = request.GET['kakaoId']
+        qs = user.objects.filter(kakao_id=kakao_id)[0]
+        res = {'data': []}
+        kakao_id = qs.kakao_id
+        name = qs.kakao_name
+        univ_name = qs.univ_name
+        email = qs.kakao_email
+        obj = {
+            'kakao_id': kakao_id,
+            'name': name,
+            'univ_name': univ_name,
+            'email': email
+        }
+        res['data'].append(obj)
+        return JsonResponse(status=200, data={'status': 200, 'message': res})
+    return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
