@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Room, Invitation
+from .models import Room, Invitation, Entrance
 from account.models import user, univ
 import hashlib
 import json
@@ -19,7 +19,7 @@ def create_room(request):
             creater_name = creater_obj.kakao_name
             owner_univ = univ.objects.filter(name=owner_univ)[0]
             opponent_univ = univ.objects.filter(name=opponent_univ)[0]
-            url = 'http://localhost:3000/game/' + \
+            url = 'http://localhost:3000/game?hash=' + \
                 get_hashed_url(room_id, creater_name)
             Room.objects.create(url=url, title=title, creater=creater_obj,
                                 owner_univ=owner_univ, opponent_univ=opponent_univ, max_join=max_join)
@@ -132,6 +132,38 @@ def invitation_reject(request):
             invitation_read(request)
             # @TODO: Need more logic
             return JsonResponse(status=200, data={'status': 200, 'message': "게임 초대를 거절하였습니다."})
+        except:
+            return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def room_enter(request):
+    if request.method == 'GET':
+        try:
+            kakao_id = request.GET['kakaoId']
+            room_url = request.GET['roomUrl']
+            user_obj = user.objects.filter(kakao_id=kakao_id)[0]
+            room_obj = Room.objects.filter(url=room_url)[0]
+            Entrance.objects.create(room=room_obj, user=user_obj)
+            return JsonResponse(status=200, data={'status': 200, 'message': "게임 초대를 거절하였습니다."})
+        except:
+            return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def room_status_by_url(request):
+    if request.method == 'GET':
+        try:
+            current_url = request.GET.get('currentURL')
+            room_obj = Room.objects.filter(url__contains=current_url)[0]
+            max_join = room_obj.max_join
+            curr_join = len(Entrance.objects.filter(room=room_obj))
+            room_status = max_join - curr_join
+            return JsonResponse(status=200, data={'status': 200, 'message': "사용자 입장 정보를 불러왔습니다.", 'data': room_status})
         except:
             return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}

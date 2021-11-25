@@ -42,3 +42,11 @@ class Invitation(models.Model):
     created_at = models.DateTimeField(null=False, default=timezone.now)
     is_deleted = models.BooleanField(default=False)
     is_read = models.BooleanField(default=False)
+
+
+class Entrance(models.Model):
+    ent_id = models.AutoField(primary_key=True)
+    room = models.ForeignKey(
+        Room, on_delete=models.CASCADE, null=True, related_name="ent_room")
+    user = models.ForeignKey(
+        user, on_delete=models.CASCADE, null=True, related_name="ent_user")

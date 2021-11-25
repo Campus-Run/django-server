@@ -9,5 +9,7 @@ urlpatterns = [
     path("api/send-invite", views.send_invite),
     path("api/invitation-by-id", views.invitation_by_id),
     path("api/invitation-read", views.invitation_read),
-    path("api/invitation-reject", views.invitation_reject)
+    path("api/invitation-reject", views.invitation_reject),
+    path("api/room-status-by-url", views.room_status_by_url),
+    path("api/room-enter", views.room_enter)
 ]
