@@ -17,8 +17,9 @@ from operator import itemgetter
 def create_ranking(request):
     if request.method == 'POST':
         try:
-            user_data = user.objects.get(kakao_email=request.data['name'])
-            
+            #user_data = user.objects.get(kakao_email=request.data['name'])
+            user_data = user.objects.get(kakao_id=request.data['id'])
+            print("유저 확인",user_data)
             # 기록 이미 존재하는지 확인
             record = Ranking.objects.filter(player=user_data).filter(game_map=request.data['game_map'])
             print(record)
@@ -29,22 +30,24 @@ def create_ranking(request):
                     score=request.data['score'],
                     game_map=request.data['game_map']
                 )
-                return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Ranking을 생성하였습니다.", 'player': user_data.kakao_name})
+                return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Ranking을 생성하였습니다.", 'player': user_data.kakao_id})
             else: # 있으면 lap_time이 더 짧은 경우에 수정
                 record = record[0]
                 if record.lap_time >= request.data['time']:
-                    print("출력!!", record.lap_time)
                     record.lap_time=request.data['time']
-                    record.score+=request.data['score']
+                    record.score+=int(request.data['score'])
                     record.save()
-                    return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Ranking을 수정하였습니다.", 'player': user_data.kakao_name})
+                    return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Ranking을 수정하였습니다.", 'player': user_data.kakao_id})
         except:
-            return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
+            log_data = "잘못된 입력 데이터입니다."
+            print("error log: ", log_data)
+            return JsonResponse(status=500, data={'status': 500, 'message': log_data})
 
 @csrf_exempt
 @api_view(['GET'])
 def speedy_ranking(request, map_id):
     if request.method == 'GET':
+        print("Speedy function in!!!")
         map_list = list(UNIV_LIST.values())
         rankings = Ranking.objects.filter(game_map=map_list[map_id]).order_by('lap_time')
         print(rankings)
@@ -52,10 +55,10 @@ def speedy_ranking(request, map_id):
         ranking_data = []
         i = 1
         for ranking in rankings:
-            user_data=user.objects.get(kakao_email=ranking.player)
+            user_data=user.objects.get(kakao_id=ranking.player)
             ranking_data.append({
                 'rank': i,
-                'player': ranking.player.kakao_name,
+                'player': user_data.kakao_id,
                 'univ': user_data.univ_name,
                 'time': ranking.lap_time,
             })
@@ -75,7 +78,7 @@ def univ_ranking(request):
         rankings = Ranking.objects.all()
 
         for ranking in rankings:
-            user_data=user.objects.get(kakao_email=ranking.player)
+            user_data=user.objects.get(kakao_id=ranking.player)
             univ_score[user_data.univ_name] += ranking.score
             print(univ_score[ranking.game_map])
 
@@ -99,10 +102,10 @@ def personal_ranking(request):
         ranking_data = {}
 
         for ranking in rankings:
-            user_data=user.objects.get(kakao_email=ranking.player)
-            if user_data.kakao_email not in ranking_data.keys():
-                ranking_data[user_data.kakao_email] = {
-                    'player':ranking.player.kakao_name, 
+            user_data=user.objects.get(kakao_id=ranking.player)
+            if user_data.kakao_id not in ranking_data.keys():
+                ranking_data[user_data.kakao_id] = {
+                    'player':ranking.player.kakao_id, 
                     'univ':user_data.univ_name,
                     'score':ranking.score
                 }
@@ -112,8 +115,9 @@ def personal_ranking(request):
                     if str(rank) == str(ranking.player):
                         ranking_data[rank]['score'] += ranking.score
                         break
+        print("sort 전", ranking_data)
         ranking_data = sorted(ranking_data, key=lambda x: ranking_data[x]['score'], reverse=True)
-        print("나와라ㅏ", ranking_data)
+        print("sort 후", ranking_data)
         return JsonResponse(status=200, data={'status': 200, 'message': "Personal Ranking List", 'ranking_data': ranking_data})
 
 
