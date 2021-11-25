@@ -34,7 +34,7 @@ def get_secret(setting, secrets=secrets):
 
 
 REST_API_KEY = get_secret('KAKAO_REST_KEY')
-REDIRECT_URI = "http://localhost:8000/login/kakao/callback"
+REDIRECT_URI = "http://18.119.57.193:8000/login/kakao/callback"
 API_HOST = 'https://kauth.kakao.com/oauth/authorize?client_id=' + \
     REST_API_KEY+'&redirect_uri='+REDIRECT_URI+'&response_type=code'
 
@@ -110,7 +110,7 @@ def KakaoSignInCallback(request):
     data = {
         'grant_type': 'authorization_code',
         'client_id': REST_API_KEY,
-        'redirection_uri': 'http://localhost:8000/account/login/kakao/callback',
+        'redirection_uri': 'http://18.119.57.193:8000/account/login/kakao/callback',
         'code': CODE,
     }
 
