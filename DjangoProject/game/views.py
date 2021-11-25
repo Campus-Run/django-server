@@ -92,7 +92,8 @@ def invitation_by_id(request):
         try:
             kakao_id = request.GET['kakaoId']
             receiver_obj = user.objects.filter(kakao_id=kakao_id)[0]
-            inv_qs = Invitation.objects.filter(receiver=receiver_obj)
+            inv_qs = Invitation.objects.filter(
+                receiver=receiver_obj, is_read=False)
             result = []
             for qs in inv_qs:
                 result.append({
@@ -109,6 +110,28 @@ def invitation_by_id(request):
                     'createDate': qs.created_at,
                 })
             return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Game Room을 생성하였습니다.", "data": result})
+        except:
+            return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def invitation_read(request):
+    inv_id = request.GET['invId']
+    inst = Invitation.objects.get(inv_id=inv_id)
+    inst.is_read = True
+    inst.save()
+    return JsonResponse(status=200, data={'status': 200, 'message': "초대 읽음 처리 완료"})
+
+
+def invitation_reject(request):
+    if request.method == 'GET':
+        try:
+            inv_id = request.GET['invId']
+            invitation_read(request)
+            # @TODO: Need more logic
+            return JsonResponse(status=200, data={'status': 200, 'message': "게임 초대를 거절하였습니다."})
         except:
             return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
