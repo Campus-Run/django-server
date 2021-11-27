@@ -12,7 +12,9 @@ class Ranking(models.Model):
 
 class Room(models.Model):
     room_id = models.AutoField(primary_key=True)
+    is_public = models.BooleanField(default=False)
     url = models.TextField(default="_")
+    waiting_url = models.TextField(default="_")
     title = models.TextField(null=True)
     creater = models.ForeignKey(
         user, on_delete=models.CASCADE, null=True)
@@ -23,6 +25,7 @@ class Room(models.Model):
     max_join = models.IntegerField(null=False, default=0)
     created_at = models.DateTimeField(null=False, default=timezone.now)
     is_deleted = models.BooleanField(default=False)
+    is_full = models.BooleanField(default=False)
 
 
 class Invitation(models.Model):
@@ -44,9 +47,30 @@ class Invitation(models.Model):
     is_read = models.BooleanField(default=False)
 
 
-class Entrance(models.Model):
+class WaitEntrance(models.Model):
+    ent_id = models.AutoField(primary_key=True)
+    room = models.ForeignKey(
+        Room, on_delete=models.CASCADE, null=True, related_name="wait_room")
+    user = models.ForeignKey(
+        user, on_delete=models.CASCADE, null=True, related_name="wait_user")
+    is_out = models.BooleanField(default=False)
+
+
+class GameEntrance(models.Model):
     ent_id = models.AutoField(primary_key=True)
     room = models.ForeignKey(
         Room, on_delete=models.CASCADE, null=True, related_name="ent_room")
     user = models.ForeignKey(
         user, on_delete=models.CASCADE, null=True, related_name="ent_user")
+
+
+class Record(models.Model):
+    rec_id = models.AutoField(primary_key=True)
+    room = models.ForeignKey(
+        Room, on_delete=models.CASCADE, null=True, related_name="rec_room")
+    user = models.ForeignKey(
+        user, on_delete=models.CASCADE, null=True, related_name="rec_user")
+    rank = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
+    start = models.IntegerField(null=True)
+    end = models.IntegerField(null=True)

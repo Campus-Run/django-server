@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Room, Invitation, Entrance
+from .models import Room, Invitation, GameEntrance, Record
 from account.models import user, univ
 import hashlib
 import json
@@ -146,7 +146,7 @@ def room_enter(request):
             room_url = request.GET['roomUrl']
             user_obj = user.objects.filter(kakao_id=kakao_id)[0]
             room_obj = Room.objects.filter(url=room_url)[0]
-            Entrance.objects.create(room=room_obj, user=user_obj)
+            GameEntrance.objects.create(room=room_obj, user=user_obj)
             return JsonResponse(status=200, data={'status': 200, 'message': "게임 초대를 거절하였습니다."})
         except:
             return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
@@ -161,9 +161,49 @@ def room_status_by_url(request):
             current_url = request.GET.get('currentURL')
             room_obj = Room.objects.filter(url__contains=current_url)[0]
             max_join = room_obj.max_join
-            curr_join = len(Entrance.objects.filter(room=room_obj))
+            curr_join = len(GameEntrance.objects.filter(room=room_obj))
             room_status = max_join - curr_join
             return JsonResponse(status=200, data={'status': 200, 'message': "사용자 입장 정보를 불러왔습니다.", 'data': room_status})
+        except:
+            return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def new_record(request):
+    if request.method == 'GET':
+        try:
+            kakao_id = request.GET.get('kakaoId')
+            current_url = request.GET.get('currentURL')
+            start = int(request.GET.get('start'))
+            user_obj = user.objects.filter(kakao_id=kakao_id)[0]
+            room_obj = Room.objects.filter(url__contains=current_url)[0]
+            Record.objects.create(room=room_obj, user=user_obj, start=start)
+            return JsonResponse(status=200, data={'status': 200, 'message': "초기 레코드를 생성하였습니다."})
+        except:
+            return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def update_record(request):
+    if request.method == 'GET':
+        try:
+            kakao_id = request.headers['kakaoId']
+            current_url = request.headers['currentURL']
+            print("hllo")
+            end = int(request.headers['endTime'])
+            print(kakao_id, current_url, end)
+            user_obj = user.objects.filter(kakao_id=kakao_id)[0]
+            room_obj = Room.objects.filter(url__contains=current_url)[0]
+            rec_obj = Record.objects.filter(room=room_obj, user=user_obj)[0]
+            if rec_obj.end == None:
+                print("User: ", kakao_id, "'s end time update!")
+                rec_obj.end = end
+                rec_obj.save()
+            return JsonResponse(status=200, data={'status': 200, 'message': "엔드 레코드를 업데이트하였습니다."})
         except:
             return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
