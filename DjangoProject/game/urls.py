@@ -13,5 +13,6 @@ urlpatterns = [
     path("api/room-status-by-url", views.room_status_by_url),
     path("api/room-enter", views.room_enter),
     path("api/new-record", views.new_record),
-    path("api/update-record", views.update_record)
+    path("api/update-record", views.update_record),
+    path("api/create-room-public", views.create_room_public)
 ]

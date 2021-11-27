@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Room, Invitation, GameEntrance, Record
+from .models import Room, Invitation, WaitEntrance, GameEntrance, Record
 from account.models import user, univ
 import hashlib
 import json
@@ -21,7 +21,9 @@ def create_room(request):
             opponent_univ = univ.objects.filter(name=opponent_univ)[0]
             url = 'http://localhost:3000/game?hash=' + \
                 get_hashed_url(room_id, creater_name)
-            Room.objects.create(url=url, title=title, creater=creater_obj,
+            waiting_url = 'http://localhost:3000/wait?hash=' + \
+                get_hashed_url(room_id, creater_name)
+            Room.objects.create(url=url, waiting_url=waiting_url, title=title, creater=creater_obj,
                                 owner_univ=owner_univ, opponent_univ=opponent_univ, max_join=max_join)
             return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Game Room을 생성하였습니다.", 'url': url})
         except:
@@ -204,6 +206,29 @@ def update_record(request):
                 rec_obj.end = end
                 rec_obj.save()
             return JsonResponse(status=200, data={'status': 200, 'message': "엔드 레코드를 업데이트하였습니다."})
+        except:
+            return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def create_room_public(request):
+    if request.method == 'GET':
+        try:
+            title = request.GET['title']
+            max_join = request.GET['maxJoin']
+            creater_id = request.GET['createrKakaoId']
+            room_id = len(Room.objects.all()) + 1
+            creater_obj = user.objects.filter(kakao_id=creater_id)[0]
+            creater_name = creater_obj.kakao_name
+            url = 'http://localhost:3000/game?hash=' + \
+                get_hashed_url(room_id, creater_name)
+            waiting_url = 'http://localhost:3000/wait?hash=' + \
+                get_hashed_url(room_id, creater_name)
+            Room.objects.create(is_public=True, url=url, waiting_url=waiting_url, title=title, creater=creater_obj,
+                                max_join=max_join)
+            return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Game Room을 생성하였습니다.", 'url': url})
         except:
             return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
