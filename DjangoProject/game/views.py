@@ -256,11 +256,11 @@ def public_room_list(request):
         univ_obj = univ.objects.filter(name=univ_name)[0]
         public_room_full_update(request)
         home_room_qs = Room.objects.filter(
-            is_public=True, owner_univ=univ_obj, is_full=False)
+            is_public=True, owner_univ=univ_obj, is_full=False, is_deleted=False)
         neutral_room_qs = Room.objects.filter(
-            is_public=True, opponent_univ=None, is_full=False)
+            is_public=True, opponent_univ=None, is_full=False, is_deleted=False)
         away_room_qs = Room.objects.filter(
-            is_public=True, opponent_univ=univ_obj, is_full=False)
+            is_public=True, opponent_univ=univ_obj, is_full=False, is_deleted=False)
         room_qs = home_room_qs
         room_qs |= neutral_room_qs
         room_qs |= away_room_qs
