@@ -391,3 +391,25 @@ def quit_wait_room(request):
 
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
     return JsonResponse(status=500, data=return_data)
+
+
+def ent_arrangement(request):
+    if request.method == 'GET':
+        kakao_id = request.GET['kakaoId']
+        waiting_url = request.GET['waitURL']
+        user_obj = user.objects.filter(kakao_id=kakao_id)[0]
+        room_obj = Room.objects.filter(waiting_url=waiting_url)[0]
+        wait_ent_qs = WaitEntrance.objects.filter(
+            room=room_obj, user=user_obj, is_out=False)
+        if(len(wait_ent_qs) == 0):
+            WaitEntrance.objects.create(
+                room=room_obj, user=user_obj, is_out=False)
+            room_obj.is_deleted = False
+            room_obj.save()
+            public_room_full_update(request)
+            return JsonResponse(status=200, data={'status': 200, 'message': "Arrangement: Done"})
+        public_room_full_update(request)
+        return JsonResponse(status=200, data={'status': 200, 'message': "Arrangement: Doesn't need"})
+
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    return JsonResponse(status=500, data=return_data)
