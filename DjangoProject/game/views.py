@@ -230,7 +230,7 @@ def create_room_public(request):
                 get_hashed_url(room_id, creater_name)
             Room.objects.create(is_public=True, url=url, waiting_url=waiting_url, title=title, creater=creater_obj,
                                 owner_univ=home_univ_obj, max_join=max_join)
-            return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Game Room을 생성하였습니다.", 'url': url})
+            return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Game Room을 생성하였습니다.", 'url': waiting_url})
         except Exception as e:
             return JsonResponse(status=500, data={'status': 500, 'message': e})
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
@@ -285,4 +285,31 @@ def public_room_list(request):
         return JsonResponse(status=200, data={'status': 200, 'message': res})
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
     print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def enter_wait_room(request):
+    if request.method == 'GET':
+        kakao_id = request.GET['kakaoId']
+        waiting_url = request.GET['waitingURL']
+        user_obj = user.objects.filter(kakao_id=kakao_id)[0]
+        univ_obj = univ.objects.filter(name=user_obj.univ_name)[0]
+        public_room_full_update(request)
+        room_obj = Room.objects.filter(waiting_url=waiting_url)[0]
+
+        if(room_obj.is_full == True):
+            return JsonResponse(status=201, data={'status': 201, 'message': "입장 가능 인원을 초과하였습니다.\n다른 방에 입장해주세요!"})
+
+        if(room_obj.owner_univ == univ_obj):
+            pass
+        else:
+            if(room_obj.opponent_univ not in [None, univ_obj]):
+                return JsonResponse(status=201, data={'status': 201, 'message': "다른 대학 플레이어가 대기중입니다.\n다른 방에 입장해주세요!"})
+            room_obj.opponent_univ = univ_obj
+            room_obj.save()
+        WaitEntrance.objects.create(room=room_obj, user=user_obj)
+        public_room_full_update(request)
+        return JsonResponse(status=200, data={'status': 200, 'message': "대기실에 입장합니다."})
+
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
     return JsonResponse(status=500, data=return_data)
