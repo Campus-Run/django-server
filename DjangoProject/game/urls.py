@@ -16,5 +16,6 @@ urlpatterns = [
     path("api/update-record", views.update_record),
     path("api/create-room-public", views.create_room_public),
     path("api/public-room-list", views.public_room_list),
-    path("api/enter-wait-room", views.enter_wait_room)
+    path("api/enter-wait-room", views.enter_wait_room),
+    path("api/quit-wait-room", views.quit_wait_room)
 ]
