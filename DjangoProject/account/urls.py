@@ -1,8 +1,5 @@
-from os import name
 from . import views
-from django.contrib import admin
 from django.urls import path
-from django.conf.urls import include
 
 urlpatterns = [
     path("", views.login_view, name="login"),
@@ -14,5 +11,9 @@ urlpatterns = [
     path("idTokenCheck/", views.id_token_check),
     path('activate/<str:uidb64>/<str:token>',
          views.Activate.as_view(), name="activate"),
-    path("user/", views.post_user, name="user")
+    path("user/", views.post_user, name="user"),
+    path("api/init-univ", views.api_init_univ_table),
+    path("api/insert-dummy-user", views.create_dummy_user_data),
+    path("api/user-search", views.user_search),
+    path("api/user-by-kakaoid", views.user_by_kakaoid),
 ]
