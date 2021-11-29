@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Room, Invitation, GameEntrance, Record
+from .models import Room, Invitation, WaitEntrance, GameEntrance, Record
 from account.models import user, univ
 import hashlib
 import json
@@ -21,7 +21,9 @@ def create_room(request):
             opponent_univ = univ.objects.filter(name=opponent_univ)[0]
             url = 'http://localhost:3000/game?hash=' + \
                 get_hashed_url(room_id, creater_name)
-            Room.objects.create(url=url, title=title, creater=creater_obj,
+            waiting_url = 'http://localhost:3000/wait?hash=' + \
+                get_hashed_url(room_id, creater_name)
+            Room.objects.create(url=url, waiting_url=waiting_url, title=title, creater=creater_obj,
                                 owner_univ=owner_univ, opponent_univ=opponent_univ, max_join=max_join)
             return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Game Room을 생성하였습니다.", 'url': url})
         except:
@@ -208,4 +210,206 @@ def update_record(request):
             return JsonResponse(status=500, data={'status': 500, 'message': "잘못된 입력 데이터입니다."})
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
     print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def create_room_public(request):
+    if request.method == 'GET':
+        try:
+            title = request.GET['roomTitle']
+            max_join = request.GET['maxJoin']
+            creater_id = request.GET['createrKakaoId']
+            room_id = len(Room.objects.all()) + 1
+            creater_obj = user.objects.filter(kakao_id=creater_id)[0]
+            creater_name = creater_obj.kakao_name
+            creater_univ = creater_obj.univ_name
+            home_univ_obj = univ.objects.filter(name=creater_univ)[0]
+            url = 'http://localhost:3000/game?hash=' + \
+                get_hashed_url(room_id, creater_name)
+            waiting_url = 'http://localhost:3000/wait?hash=' + \
+                get_hashed_url(room_id, creater_name)
+            Room.objects.create(is_public=True, url=url, waiting_url=waiting_url, title=title, creater=creater_obj,
+                                owner_univ=home_univ_obj, max_join=max_join)
+            return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 Game Room을 생성하였습니다.", 'url': waiting_url})
+        except Exception as e:
+            return JsonResponse(status=500, data={'status': 500, 'message': e})
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def public_room_full_update(request):
+    room_qs = Room.objects.filter(is_public=True, is_deleted=False)
+    for room_obj in room_qs:
+        ent_num = len(WaitEntrance.objects.filter(room=room_obj, is_out=False))
+        if(ent_num >= room_obj.max_join):
+            room_obj.is_full = True
+        else:
+            room_obj.is_full = False
+        room_obj.save()
+
+
+def public_room_list(request):
+    if request.method == 'GET':
+        kakao_id = request.GET['kakaoId']
+        univ_name = request.GET['univName']
+        univ_obj = univ.objects.filter(name=univ_name)[0]
+        public_room_full_update(request)
+        home_room_qs = Room.objects.filter(
+            is_public=True, owner_univ=univ_obj, is_full=False, is_deleted=False)
+        neutral_room_qs = Room.objects.filter(
+            is_public=True, opponent_univ=None, is_full=False, is_deleted=False).exclude(owner_univ=univ_obj)
+        away_room_qs = Room.objects.filter(
+            is_public=True, opponent_univ=univ_obj, is_full=False, is_deleted=False)
+
+        # Filter half of maxJoin check (Team seat checking)
+        room_qs = []
+        for nr in neutral_room_qs:
+            room_qs.append(nr)
+
+        for hr in home_room_qs:
+            team_max = int(hr.max_join / 2)
+            wait_qs = WaitEntrance.objects.filter(room=hr, is_out=False)
+            count = 0
+            for wait in wait_qs:
+                wait_user_univ = univ.objects.get(name=wait.user.univ_name)
+                if(wait_user_univ == hr.owner_univ):
+                    count += 1
+            if(count < team_max):
+                room_qs.append(hr)
+
+        for ar in away_room_qs:
+            team_max = int(ar.max_join / 2)
+            wait_qs = WaitEntrance.objects.filter(room=ar, is_out=False)
+            count = 0
+            for wait in wait_qs:
+                wait_user_univ = univ.objects.get(name=wait.user.univ_name)
+                if(wait_user_univ == ar.opponent_univ):
+                    count += 1
+            if(count < team_max):
+                room_qs.append(ar)
+
+        res = {'data': []}
+        for i in range(len(room_qs)):
+            # Room_QS max / 2 checking
+            curr_ent = len(WaitEntrance.objects.filter(
+                room=room_qs[i], is_out=False))
+            if room_qs[i].opponent_univ == None:
+                oppo_univ_name = ""
+            else:
+                oppo_univ_name = room_qs[i].opponent_univ.name
+            obj = {
+                'waitingURL': room_qs[i].waiting_url,
+                'gameURL': room_qs[i].url,
+                'title': room_qs[i].title,
+                'homeUniv': room_qs[i].owner_univ.name,
+                'opponentUniv': oppo_univ_name,
+                'currJoin': curr_ent,
+                'maxJoin': room_qs[i].max_join,
+            }
+            res['data'].append(obj)
+        return JsonResponse(status=200, data={'status': 200, 'message': res})
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    print(return_data)
+    return JsonResponse(status=500, data=return_data)
+
+
+def room_opponent_univ_update(request, room_obj):
+    wait_ent_qs = WaitEntrance.objects.filter(room=room_obj, is_out=False)
+    for wait_ent in wait_ent_qs:
+        user = wait_ent.user
+        user_univ = univ.objects.filter(name=user.univ_name)[0]
+        if(user_univ != room_obj.owner_univ):
+            room_obj.opponent_univ = user_univ
+            room_obj.save()
+            return
+    room_obj.opponent_univ = None
+    room_obj.save()
+    return
+
+
+def enter_wait_room(request):
+    if request.method == 'GET':
+        kakao_id = request.GET['kakaoId']
+        waiting_url = request.GET['waitingURL']
+        user_obj = user.objects.filter(kakao_id=kakao_id)[0]
+        univ_obj = univ.objects.filter(name=user_obj.univ_name)[0]
+        public_room_full_update(request)
+        room_obj = Room.objects.filter(waiting_url=waiting_url)[0]
+
+        if(room_obj.is_full == True):
+            return JsonResponse(status=201, data={'status': 201, 'message': "입장 가능 인원을 초과하였습니다.\n다른 방에 입장해주세요!"})
+
+        if(room_obj.owner_univ == univ_obj):
+            pass
+        else:
+            if(room_obj.opponent_univ not in [None, univ_obj]):
+                return JsonResponse(status=201, data={'status': 201, 'message': "다른 대학 플레이어가 대기중입니다.\n다른 방에 입장해주세요!"})
+            room_obj.opponent_univ = univ_obj
+            room_obj.save()
+        WaitEntrance.objects.create(room=room_obj, user=user_obj)
+        public_room_full_update(request)
+        return JsonResponse(status=200, data={'status': 200, 'message': "대기실에 입장합니다."})
+
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    return JsonResponse(status=500, data=return_data)
+
+
+def quit_wait_room(request):
+    if request.method == 'GET':
+        kakao_id = request.GET['kakaoId']
+        waiting_url = request.GET['waitURL']
+        user_obj = user.objects.filter(kakao_id=kakao_id)[0]
+        univ_obj = univ.objects.filter(name=user_obj.univ_name)[0]
+        room_obj = Room.objects.filter(waiting_url=waiting_url)[0]
+        wait_ent_obj = WaitEntrance.objects.filter(
+            room=room_obj, user=user_obj, is_out=False)[0]
+        wait_ent_obj.is_out = True
+        wait_ent_obj.save()
+        wait_ent = WaitEntrance.objects.filter(room=room_obj, is_out=False)
+        if(len(wait_ent) == 0):
+            room_obj.is_deleted = True
+            room_obj.save()
+        else:  # 방에 인원이 남아있고
+            if(user_obj == room_obj.creater):  # 방장이 나갈경우
+                there_creater_univ = False
+                for wait in wait_ent:
+                    if wait.user.univ_name == user_obj.univ_name:  # 방장이 같은 학교 사람에게 위임
+                        room_obj.creater = wait.user
+                        room_obj.save()
+                        there_creater_univ = True
+                if(there_creater_univ == False):  # 방장이 다른 학교 사람에게 위임
+                    room_obj.creater = wait_ent[0].user
+                    room_obj.owner_univ = univ.objects.filter(
+                        name=wait_ent[0].user.univ_name)[0]
+                    room_obj.opponent_univ = None
+                    room_obj.save()
+            else:
+                room_opponent_univ_update(request, room_obj)
+            public_room_full_update(request)
+        return JsonResponse(status=200, data={'status': 200, 'message': "대기실에서 퇴장합니다."})
+
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    return JsonResponse(status=500, data=return_data)
+
+
+def ent_arrangement(request):
+    if request.method == 'GET':
+        kakao_id = request.GET['kakaoId']
+        waiting_url = request.GET['waitURL']
+        user_obj = user.objects.filter(kakao_id=kakao_id)[0]
+        room_obj = Room.objects.filter(waiting_url=waiting_url)[0]
+        wait_ent_qs = WaitEntrance.objects.filter(
+            room=room_obj, user=user_obj, is_out=False)
+        if(len(wait_ent_qs) == 0):
+            WaitEntrance.objects.create(
+                room=room_obj, user=user_obj, is_out=False)
+            room_obj.is_deleted = False
+            room_obj.save()
+            public_room_full_update(request)
+            return JsonResponse(status=200, data={'status': 200, 'message': "Arrangement: Done"})
+        public_room_full_update(request)
+        return JsonResponse(status=200, data={'status': 200, 'message': "Arrangement: Doesn't need"})
+
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
     return JsonResponse(status=500, data=return_data)

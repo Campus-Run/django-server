@@ -19,9 +19,9 @@ class Room(models.Model):
     creater = models.ForeignKey(
         user, on_delete=models.CASCADE, null=True)
     owner_univ = models.ForeignKey(
-        univ, on_delete=models.CASCADE, related_name="home_room")
+        univ, on_delete=models.CASCADE, related_name="home_room", null=False)
     opponent_univ = models.ForeignKey(
-        univ, on_delete=models.CASCADE, related_name="away_room")
+        univ, on_delete=models.CASCADE, related_name="away_room", null=True)
     max_join = models.IntegerField(null=False, default=0)
     created_at = models.DateTimeField(null=False, default=timezone.now)
     is_deleted = models.BooleanField(default=False)
