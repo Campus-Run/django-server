@@ -550,3 +550,57 @@ def room(request):
         room.hash_key = 'http://localhost:3000/game/' + str(room.id)
         room.save()
         return Response({'owner': room.owner.kakao_name, 'title': room.title, 'ownerUniversity': room.owner_university, 'opponent_university': room.opponent_university, 'room_id': room.id}, status=200)
+
+
+def sync_wait_room_status(request):
+    if request.method == 'GET':
+        waiting_url = request.GET['waitURL']
+        curr_id_list = request.GET['currentIdList'].split(',')
+        room_obj = Room.objects.filter(waiting_url=waiting_url)[0]
+        creater_obj = room_obj.creater
+        max_join = int(room_obj.max_join)
+        home_univ = room_obj.owner_univ
+        wait_ent_qs = WaitEntrance.objects.filter(
+            room=room_obj, is_out=False)
+
+        home_ent = []
+        away_ent = []
+        id_list = []
+        is_full = False
+        creater = {
+            'kakaoId': creater_obj.kakao_id,
+            'name': creater_obj.kakao_name,
+            'univ': creater_obj.univ_name
+        }
+
+        if(max_join <= len(wait_ent_qs)):
+            is_full = True
+
+        for wait in wait_ent_qs:
+            obj = {
+                'kakaoId': wait.user.kakao_id,
+                'name': wait.user.kakao_name,
+                'univ': wait.user.univ_name,
+            }
+            id_list.append(wait.user.kakao_id)
+            if (wait.user.univ_name == home_univ.name):
+                home_ent.append(obj)
+            else:
+                away_ent.append(obj)
+
+        res = {
+            'roomTitle': room_obj.title,
+            'homeEntry': home_ent,
+            'awayEntry': away_ent,
+            'creater': creater,
+            'isFull': is_full,
+            'idList': id_list
+        }
+
+        public_room_full_update(request)
+        if(curr_id_list == id_list):
+            return JsonResponse(status=200, data={'status': 200, 'message': "Nothing to sync..", 'data': res})
+        return JsonResponse(status=200, data={'status': 200, 'message': "Data sync complete..", 'data': res})
+
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    return JsonResponse(status=500, data=return_data)
