@@ -16,5 +16,5 @@ UNIV_LIST = {
     'khu.ac.kr': '경희대',
     'hufs.ac.kr': '한국외대',
     'uos.ac.kr': '시립대',
-    'kru.ac.kr': '고려대',
+    'kru.ac.kr': '한국대',
 }

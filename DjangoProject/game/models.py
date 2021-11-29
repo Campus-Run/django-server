@@ -8,6 +8,7 @@ class Ranking(models.Model):
         user, related_name='user', on_delete=models.CASCADE)
     score = models.IntegerField(default=0)
     lap_time = models.CharField(null=True, blank=True, max_length=63)
+    game_map = models.CharField(null=True, max_length=15)
 
 
 class Room(models.Model):

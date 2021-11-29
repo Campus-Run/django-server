@@ -18,5 +18,10 @@ urlpatterns = [
     path("api/public-room-list", views.public_room_list),
     path("api/enter-wait-room", views.enter_wait_room),
     path("api/quit-wait-room", views.quit_wait_room),
-    path("api/ent-arrangement", views.ent_arrangement)
+    path("api/ent-arrangement", views.ent_arrangement),
+    path("api/create-ranking", views.create_ranking, name="create_ranking"),
+    path("api/speedy-ranking/<int:map_id>",
+         views.speedy_ranking, name="speedy_ranking"),
+    path("api/univ-ranking", views.univ_ranking, name="univ_ranking"),
+    path("api/personal-ranking", views.personal_ranking, name="personal_ranking"),
 ]
