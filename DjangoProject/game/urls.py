@@ -24,4 +24,8 @@ urlpatterns = [
          views.speedy_ranking, name="speedy_ranking"),
     path("api/univ-ranking", views.univ_ranking, name="univ_ranking"),
     path("api/personal-ranking", views.personal_ranking, name="personal_ranking"),
+    path("api/sync-wait-room-status", views.sync_wait_room_status),
+    path("api/room-to-start-status", views.room_status_start),
+    path("api/room-status", views.check_room_start),
+    path("api/game-enter", views.game_enter_from_wait)
 ]
