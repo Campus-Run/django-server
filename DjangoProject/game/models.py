@@ -27,6 +27,7 @@ class Room(models.Model):
     created_at = models.DateTimeField(null=False, default=timezone.now)
     is_deleted = models.BooleanField(default=False)
     is_full = models.BooleanField(default=False)
+    is_start = models.BooleanField(default=False)
 
 
 class Invitation(models.Model):
