@@ -16,4 +16,5 @@ urlpatterns = [
     path("api/insert-dummy-user", views.create_dummy_user_data),
     path("api/user-search", views.user_search),
     path("api/user-by-kakaoid", views.user_by_kakaoid),
+    path("api/nickname", views.check_nickname),
 ]

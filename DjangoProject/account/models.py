@@ -2,6 +2,7 @@ from django.db import models
 
 
 class user(models.Model):
+    nickname = models.TextField(null=True, max_length=15, verbose_name="nickname")
     user_seq = models.AutoField(primary_key=True)
     kakao_email = models.EmailField(
         null=True, max_length=254, verbose_name="kakao_email", blank=False)

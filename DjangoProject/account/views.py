@@ -16,6 +16,8 @@ import hashlib
 from django.views.generic import View
 from .univ_list import UNIV_DOMAIN, UNIV_LIST
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_FILE = os.path.join(BASE_DIR, 'secrets.json')
@@ -261,3 +263,31 @@ def user_by_kakaoid(request):
         res['data'].append(obj)
         return JsonResponse(status=200, data={'status': 200, 'message': res})
     return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
+
+
+@csrf_exempt
+@api_view(['POST'])
+def check_nickname(request):
+    if request.method == 'POST':
+        try:
+            user_data = user.objects.get(kakao_id=request.data['id'])
+            exist_user = user.objects.filter(nickname=request.data['nickname'])
+            print(user_data, exist_user)
+            if len(exist_user) != 0:
+                exist_nickname = user.objects.get(kakao_id=exist_user[0]).nickname
+                if user_data.nickname != exist_nickname:
+                    # 본인의 닉네임이 아니고, 닉네임을 사용하는 유저가 있는 경우
+                    log_data = "존재하는 닉네임입니다."
+                    return JsonResponse(status=500, data={'status': 500, 'message': log_data})
+                else:
+                    return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 닉네임을 설정하셨습니다.", 'nickname': user_data.nickname})
+            if len(request.data['nickname']) >= 15 or len(request.data['nickname']) < 2:
+                log_data = "닉네임은 2자에서 15자 이내로 설정해주세요."
+                return JsonResponse(status=500, data={'status': 500, 'message': log_data})
+            user_data.nickname = request.data['nickname']
+            user_data.save()
+            return JsonResponse(status=200, data={'status': 200, 'message': "성공적으로 닉네임을 설정하셨습니다.", 'nickname': user_data.nickname})
+
+        except:
+            log_data = "잘못된 입력 데이터입니다."
+            return JsonResponse(status=500, data={'status': 500, 'message': log_data})
