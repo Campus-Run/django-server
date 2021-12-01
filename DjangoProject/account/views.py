@@ -264,10 +264,11 @@ def user_by_kakaoid(request):
         return JsonResponse(status=200, data={'status': 200, 'message': res})
     return JsonResponse(status=500, data={'status': 500, 'message': "Request Method가 잘못되었습니다."})
 
-
+'''
 @csrf_exempt
 @api_view(['POST'])
 def check_nickname(request):
+    
     if request.method == 'POST':
         try:
             user_data = user.objects.get(kakao_id=request.data['id'])
@@ -291,3 +292,22 @@ def check_nickname(request):
         except:
             log_data = "잘못된 입력 데이터입니다."
             return JsonResponse(status=500, data={'status': 500, 'message': log_data})
+'''
+
+def check_nickname(request):
+    if request.method == 'GET':
+        try:
+            kakao_id = request.GET['kakaoId']
+            user_obj = user.objects.filter(kakao_id=kakao_id)[0]
+            user_nickname = user_obj.nickname
+            if user_nickname != None: # 닉네임 존재
+                print("닉네임 있음")
+                return_data = {'status':200, 'message':'닉네임이 존재합니다.',
+                                "data": {'nicknamestatus':'exist'}}
+                return JsonResponse(status=200, data=return_data)
+            else: # 닉네임 없는 경우
+                return_data = {'status':200, 'message':'닉네임이 없습니다.',
+                                "data": {'nicknamestatus':'none'}}
+                return JsonResponse(status=200, data=return_data)
+        except:
+            return JsonResponse(ststus=500)
