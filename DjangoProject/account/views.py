@@ -301,7 +301,6 @@ def check_nickname(request):
             user_obj = user.objects.filter(kakao_id=kakao_id)[0]
             user_nickname = user_obj.nickname
             if user_nickname != None: # 닉네임 존재
-                print("닉네임 있음")
                 return_data = {'status':200, 'message':'닉네임이 존재합니다.',
                                 "data": {'nicknamestatus':'exist'}}
                 return JsonResponse(status=200, data=return_data)
@@ -311,3 +310,26 @@ def check_nickname(request):
                 return JsonResponse(status=200, data=return_data)
         except:
             return JsonResponse(ststus=500)
+
+def create_nickname(request):
+    if request.method =='GET':
+        kakao_id = request.GET['kakaoId']
+        user_info = user.objects.filter(kakao_id=kakao_id)[0]
+        input_nickname = request.GET['nickname']
+        exist_nickname = user.objects.filter(nickname=input_nickname)
+        print(kakao_id, user_info, input_nickname, exist_nickname)
+        if len(exist_nickname) > 0:
+            print(exist_nickname)
+            return_data = {'status':200, 'message':'중복된 닉네임입니다.',
+                                "data": {'nicknamestatus':'exist'}}
+            return JsonResponse(status=200, data=return_data)
+        else:
+            if len(input_nickname) >= 15 or len(input_nickname) < 2:
+                return_data = {'status':200, 'message': '닉네임은 2자에서 15자 이내로 설정해주세요.',
+                                    "data": {'nicknamestatus':'condition'}}
+                return JsonResponse(status=200, data=return_data)
+            user_info.nickname = input_nickname
+            user_info.save()
+            return_data = {'status':200, 'message':'성공적으로 닉네임을 설정했습니다.',
+                                "data": {'nicknamestatus':'none'}}
+            return JsonResponse(status=200, data=return_data)
