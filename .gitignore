@@ -4,3 +4,4 @@ secrets.json
 **/.DS_Store
 __pycache__
 db.sqlite3
+DjangoProject/db.sqlite3
