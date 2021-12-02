@@ -200,8 +200,8 @@ def update_record(request):
         try:
             kakao_id = request.headers['kakaoId']
             current_url = request.headers['currentURL']
-            print("hllo")
-            end = int(request.headers['endTime'])
+            print("update record")
+            end = int(request.  headers['endTime'])
             print(kakao_id, current_url, end)
             user_obj = user.objects.filter(kakao_id=kakao_id)[0]
             room_obj = Room.objects.filter(url__contains=current_url)[0]
