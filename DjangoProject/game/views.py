@@ -24,9 +24,9 @@ def create_room(request):
             creater_name = creater_obj.kakao_name
             owner_univ = univ.objects.filter(name=owner_univ)[0]
             opponent_univ = univ.objects.filter(name=opponent_univ)[0]
-            url = 'http://localhost:3000/game?hash=' + \
+            url = 'http://3.35.178.12:3000/game?hash=' + \
                 get_hashed_url(room_id, creater_name)
-            waiting_url = 'http://localhost:3000/wait?hash=' + \
+            waiting_url = 'http://3.35.178.12:3000/wait?hash=' + \
                 get_hashed_url(room_id, creater_name)
             Room.objects.create(url=url, waiting_url=waiting_url, title=title, creater=creater_obj,
                                 owner_univ=owner_univ, opponent_univ=opponent_univ, max_join=max_join)
@@ -200,8 +200,8 @@ def update_record(request):
         try:
             kakao_id = request.headers['kakaoId']
             current_url = request.headers['currentURL']
-            print("hllo")
-            end = int(request.headers['endTime'])
+            print("update record")
+            end = int(request.  headers['endTime'])
             print(kakao_id, current_url, end)
             user_obj = user.objects.filter(kakao_id=kakao_id)[0]
             room_obj = Room.objects.filter(url__contains=current_url)[0]
@@ -229,9 +229,9 @@ def create_room_public(request):
             creater_name = creater_obj.kakao_name
             creater_univ = creater_obj.univ_name
             home_univ_obj = univ.objects.filter(name=creater_univ)[0]
-            url = 'http://localhost:3000/game?hash=' + \
+            url = 'http://3.35.178.12:3000/game?hash=' + \
                 get_hashed_url(room_id, creater_name)
-            waiting_url = 'http://localhost:3000/wait?hash=' + \
+            waiting_url = 'http://3.35.178.12:3000/wait?hash=' + \
                 get_hashed_url(room_id, creater_name)
             Room.objects.create(is_public=True, url=url, waiting_url=waiting_url, title=title, creater=creater_obj,
                                 owner_univ=home_univ_obj, max_join=max_join)
@@ -547,7 +547,7 @@ def room(request):
             owner_university=user_data.univ_name,
             opponent_university=request.data['opponent_university']
         )
-        room.hash_key = 'http://localhost:3000/game/' + str(room.id)
+        room.hash_key = 'http://3.35.178.12:3000/game/' + str(room.id)
         room.save()
         return Response({'owner': room.owner.kakao_name, 'title': room.title, 'ownerUniversity': room.owner_university, 'opponent_university': room.opponent_university, 'room_id': room.id}, status=200)
 
