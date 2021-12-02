@@ -16,7 +16,7 @@ class user(models.Model):
         auto_now_add=True, verbose_name="register_date")
 
     def __str__(self):
-        return self.kakao_email
+        return self.kakao_id
 
 
 class univ(models.Model):
