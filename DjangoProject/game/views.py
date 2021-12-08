@@ -666,7 +666,7 @@ def game_end_check(request):
     if request.method == 'GET':
         game_url = request.GET['gameURL']
         room_obj = Room.objects.get(url=game_url)
-        record_obj = Record.objects.filter(Room=room_obj)
+        record_obj = Record.objects.filter(room=room_obj)
         
         for rec in record_obj:
             if rec.end != None:
