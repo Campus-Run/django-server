@@ -670,7 +670,7 @@ def game_end_check(request):
         
         for rec in record_obj:
             if rec.end != None:
-                return JsonResponse(status=200, data={'status': 200, 'gameStatus': 'end' 'winner': rec.user.kakao_name})
+                return JsonResponse(status=200, data={'status': 200, 'gameStatus': 'end', 'winner': rec.user.kakao_name})
         return JsonResponse(status=200, data={'status': 200, 'gameStatus': 'playing'})
 
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
