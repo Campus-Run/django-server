@@ -201,7 +201,7 @@ def update_record(request):
             kakao_id = request.headers['kakaoId']
             current_url = request.headers['currentURL']
             print("update record")
-            end = int(request.  headers['endTime'])
+            end = int(request.headers['endTime'])
             print(kakao_id, current_url, end)
             user_obj = user.objects.filter(kakao_id=kakao_id)[0]
             room_obj = Room.objects.filter(url__contains=current_url)[0]
@@ -657,6 +657,21 @@ def game_enter_from_wait(request):
         user_obj = user.objects.filter(kakao_id=kakao_id)[0]
         GameEntrance.objects.create(room=room_obj, user=user_obj)
         return JsonResponse(status=200, data={'status': 200, 'message': "방에 입장합니다!"})
+
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    return JsonResponse(status=500, data=return_data)
+
+
+def game_end_check(request):
+    if request.method == 'GET':
+        game_url = request.GET['gameURL']
+        room_obj = Room.objects.get(url=game_url)
+        record_obj = Record.objects.filter(room=room_obj)
+        
+        for rec in record_obj:
+            if rec.end != None:
+                return JsonResponse(status=200, data={'status': 200, 'gameStatus': 'end', 'winner': rec.user.kakao_name})
+        return JsonResponse(status=200, data={'status': 200, 'gameStatus': 'playing'})
 
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
     return JsonResponse(status=500, data=return_data)
