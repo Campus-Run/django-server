@@ -27,5 +27,6 @@ urlpatterns = [
     path("api/sync-wait-room-status", views.sync_wait_room_status),
     path("api/room-to-start-status", views.room_status_start),
     path("api/room-status", views.check_room_start),
-    path("api/game-enter", views.game_enter_from_wait)
+    path("api/game-enter", views.game_enter_from_wait),
+    path("api/end-check", views.game_end_check)
 ]
