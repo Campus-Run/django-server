@@ -660,3 +660,18 @@ def game_enter_from_wait(request):
 
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
     return JsonResponse(status=500, data=return_data)
+
+
+def game_end_check(request):
+    if request.method == 'GET':
+        game_url = request.GET['gameURL']
+        room_obj = Room.objects.get(url=game_url)
+        record_obj = Record.objects.filter(Room=room_obj)
+        
+        for rec in record_obj:
+            if rec.end != None:
+                return JsonResponse(status=200, data={'status': 'end', 'winner': rec.user.kakao_name})
+        return JsonResponse(status=200, data={'status': 'playing'})
+
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    return JsonResponse(status=500, data=return_data)
