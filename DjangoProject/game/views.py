@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from operator import itemgetter
 from account.univ_list import UNIV_LIST
+from django.db.models import F
 
 
 def create_room(request):
@@ -667,11 +668,41 @@ def game_end_check(request):
         game_url = request.GET['gameURL']
         room_obj = Room.objects.get(url=game_url)
         record_obj = Record.objects.filter(room=room_obj)
-        
+
         for rec in record_obj:
             if rec.end != None:
                 return JsonResponse(status=200, data={'status': 200, 'gameStatus': 'end', 'winner': rec.user.kakao_name})
         return JsonResponse(status=200, data={'status': 200, 'gameStatus': 'playing'})
+
+    return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
+    return JsonResponse(status=500, data=return_data)
+
+
+def get_result_board(request):
+    if request.method == 'GET':
+        game_url = request.GET['gameURL']
+        room_obj = Room.objects.get(url=game_url)
+        record_obj = Record.objects.filter(
+            room=room_obj).order_by(F('end').desc(nulls_last=True))
+
+        rec_data = []
+        rank = 1
+        time = 0
+        for rec in record_obj:
+            end = rec.end
+            if end == None:
+                time = "Retire"
+            else:
+                time = end - rec.start
+            rec_data.append({
+                'rank': rank,
+                'name': rec.user.kakao_name,
+                'univ': rec.user.univ_name,
+                'time': time
+            })
+            rank += 1
+
+        return JsonResponse(status=200, data={'status': 200, 'result': rec_data})
 
     return_data = {'status': 500, 'message': "Request Method가 잘못되었습니다."}
     return JsonResponse(status=500, data=return_data)

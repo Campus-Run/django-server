@@ -28,5 +28,6 @@ urlpatterns = [
     path("api/room-to-start-status", views.room_status_start),
     path("api/room-status", views.check_room_start),
     path("api/game-enter", views.game_enter_from_wait),
-    path("api/end-check", views.game_end_check)
+    path("api/end-check", views.game_end_check),
+    path("api/result-board", views.get_result_board)
 ]
