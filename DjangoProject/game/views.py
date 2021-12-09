@@ -697,6 +697,7 @@ def get_result_board(request):
             rec_data.append({
                 'rank': rank,
                 'name': rec.user.kakao_name,
+                'univ': rec.user.univ_name,
                 'time': time
             })
             rank += 1
