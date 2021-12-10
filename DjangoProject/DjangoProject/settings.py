@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = [
-    "http://10.210.96.142:3000",
+    "http://172.30.1.33:3000",
     "http://127.0.0.1:3000"
 ]
 
