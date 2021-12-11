@@ -72,6 +72,6 @@
   <tr>
     <td align="center"><a href="https://github.com/youngkwon02"><img src="https://avatars.githubusercontent.com/u/39653584?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Youngkwon Kim</b></sub></a><br />Main Developer<br /><a href="https://github.com/Campus-Run/django-server/commits?author=youngkwon02" title="Documentation">⭐️</a></td>
         <td align="center"><a href="https://github.com/oereo"><img src="https://avatars.githubusercontent.com/u/49235528?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sehoon In</b></sub></a><br />Sub Developer<br /><a href="https://github.com/Campus-Run/django-server/commits?author=oereo" title="Documentation">⭐️</a></td>
-        <td align="center"><a href="https://github.com/ohjeeyoung"><img src="https://avatars.githubusercontent.com/u/62995632?s=70&v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sehoon In</b></sub></a><br />Sub Developer<br /><a href="https://github.com/Campus-Run/django-server/commits?author=ohjeeyoung" title="Documentation">⭐️</a></td>
+        <td align="center"><a href="https://github.com/ohjeeyoung"><img src="https://avatars.githubusercontent.com/u/62995632?s=70&v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jeeyoung Oh</b></sub></a><br />Sub Developer<br /><a href="https://github.com/Campus-Run/django-server/commits?author=ohjeeyoung" title="Documentation">⭐️</a></td>
   </tr>
 </table>
